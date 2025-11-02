@@ -1,0 +1,11 @@
+{
+    "uuid": "stock-applet@cinnamon",
+    "name": "Stock Applet",
+    "description": "Monitor stock prices with historical chart display",
+    "version": "1.0.0",
+    "cinnamon-version": ["4.0", "4.2", "4.4", "4.6", "4.8", "5.0", "5.2", "5.4", "5.6", "5.8", "6.0"],
+    "icon": "accessories-calculator",
+    "author": "Stock Applet Team",
+    "url": "",
+    "max-instances": -1
+}

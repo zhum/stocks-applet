@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Stock Applet
+Comment=Monitor stock prices with historical charts
+Icon=accessories-calculator
+Exec=/usr/lib/mate-applets/stock_applet.py
+Type=Application
+Categories=System;Monitor;Finance;
+NoDisplay=true

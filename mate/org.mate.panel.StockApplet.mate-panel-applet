@@ -1,0 +1,12 @@
+[Applet Factory]
+Id=StockAppletFactory
+InProcess=false
+Location=/usr/lib/mate-applets/stock_applet.py
+Name=Stock Applet
+Description=Monitor stock prices with historical charts
+
+[StockApplet]
+Name=Stock Applet
+Description=Displays stock prices and charts in the panel
+Icon=accessories-calculator
+MateComponentId=OAFIID:MATE_StockApplet

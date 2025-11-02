@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.mate.panel.applet.StockAppletFactory
+Exec=/usr/lib/mate-applets/stock_applet.py

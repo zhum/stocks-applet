@@ -1,0 +1,104 @@
+{
+    "api-token": {
+        "type": "entry",
+        "default": "",
+        "description": "Finnhub API Token",
+        "tooltip": "API token from finnhub.io (required for stock data)"
+    },
+    "stock-symbol": {
+        "type": "entry",
+        "default": "NVDA",
+        "description": "Stock Symbol",
+        "tooltip": "Stock symbol to monitor (e.g., NVDA, AAPL, TSLA)"
+    },
+    "update-interval": {
+        "type": "spinbutton",
+        "default": 60,
+        "min": 1,
+        "max": 60,
+        "step": 1,
+        "description": "Update interval (minutes)",
+        "tooltip": "How often to fetch new stock data (1-60 minutes)"
+    },
+    "show-current-price": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Show current price",
+        "tooltip": "Display current stock price in the panel"
+    },
+    "show-daily-range": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Show daily range",
+        "tooltip": "Display daily high and low prices"
+    },
+    "show-panel-chart": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Show mini chart on panel",
+        "tooltip": "Display mini price chart directly on the panel"
+    },
+    "show-symbol-on-panel": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Show stock symbol on panel chart",
+        "tooltip": "Display the stock symbol on the panel chart"
+    },
+    "chart-width": {
+        "type": "spinbutton",
+        "default": 60,
+        "min": 40,
+        "max": 400,
+        "step": 10,
+        "description": "Chart width (pixels)",
+        "tooltip": "Width of the price chart in pixels"
+    },
+    "chart-area-transparency": {
+        "type": "scale",
+        "default": 0.3,
+        "min": 0.0,
+        "max": 1.0,
+        "step": 0.1,
+        "description": "Chart background transparency",
+        "tooltip": "Controls the transparency of the chart background area (0.0 = fully transparent, 1.0 = fully opaque)"
+    },
+    "chart-line-color": {
+        "type": "colorchooser",
+        "default": "rgba(51, 204, 51, 1.0)",
+        "description": "Chart line color",
+        "tooltip": "Color for the chart line and indicators"
+    },
+    "chart-area-color": {
+        "type": "colorchooser",
+        "default": "rgba(51, 204, 51, 0.3)",
+        "description": "Chart area fill color",
+        "tooltip": "Color for the filled area under the chart line"
+    },
+    "font-size": {
+        "type": "spinbutton",
+        "default": 10,
+        "min": 6,
+        "max": 20,
+        "step": 1,
+        "description": "Font size for text",
+        "tooltip": "Font size for price and symbol text on the chart (6-20 pixels)"
+    },
+    "font-color": {
+        "type": "colorchooser",
+        "default": "rgba(255, 255, 255, 1.0)",
+        "description": "Font color",
+        "tooltip": "Color for price and symbol text"
+    },
+    "enable-font-shadow": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Enable font shadow",
+        "tooltip": "Draw a shadow under text for better readability"
+    },
+    "font-shadow-color": {
+        "type": "colorchooser",
+        "default": "rgba(0, 0, 0, 0.8)",
+        "description": "Font shadow color",
+        "tooltip": "Color for the text shadow"
+    }
+}
