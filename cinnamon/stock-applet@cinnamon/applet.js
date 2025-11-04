@@ -287,8 +287,12 @@ StockApplet.prototype = {
             cr.setFontSize(this.fontSize || 10);
 
             let priceText = currentPrice.toFixed(2);
-            let textExtents = cr.textExtents(priceText);
-            let priceX = width - textExtents.width - 2;
+            let priceX = 2
+            try {
+                let textExtents = cr.textExtents(priceText);
+                priceX = width - textExtents.width - 2;
+            } catch(err) {
+            }
             let priceY = height - 2;
             this.drawTextWithShadow(cr, priceText, priceX, priceY);
         }
