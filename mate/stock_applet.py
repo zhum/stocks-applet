@@ -59,7 +59,7 @@ class StockApplet:
         self.container.set_homogeneous(False)
         # Make container expand to fill applet space
         self.container.set_vexpand(True)
-        self.container.set_hexpand(True)
+        self.container.set_hexpand(False)
         self.applet.add(self.container)
 
         # Initialize display widgets
@@ -67,6 +67,7 @@ class StockApplet:
         self.label.set_text("Stock: --")
         self.label.set_has_tooltip(True)
         self.label.set_valign(Gtk.Align.CENTER)  # Center vertically in panel
+        self.label.set_halign(Gtk.Align.START)
 
         # Individual chart drawing areas
         self.chart_areas = {}
@@ -77,14 +78,15 @@ class StockApplet:
 
         # Configure applet to fill panel space
         self.applet.set_vexpand(True)
-        self.applet.set_hexpand(True)
+        self.applet.set_hexpand(False)
+        self.applet.set_halign(Gtk.Align.START)
 
         # Set MATE panel applet size flags to expand and fill
         try:
             # Request to expand and fill available space
             self.applet.set_flags(MatePanelApplet.AppletFlags.EXPAND_MAJOR |
                                   MatePanelApplet.AppletFlags.EXPAND_MINOR)
-        except:
+        except Exception:
             pass  # Fallback if MATE flags not available
 
         self.applet.show_all()
@@ -220,7 +222,8 @@ class StockApplet:
                 tooltip_lines.append(f"Current: ${current_price:.2f}")
 
             if daily_high is not None and daily_low is not None:
-                tooltip_lines.append(f"Today's Range: ${daily_low:.2f} - ${daily_high:.2f}")
+                tooltip_lines.append(
+                    f"Today's Range: ${daily_low:.2f} - ${daily_high:.2f}")
         else:
             tooltip_lines.append(f"Stock: {symbol}")
             tooltip_lines.append("No current data available")
@@ -229,7 +232,8 @@ class StockApplet:
         if self.timestamps and self.price_data:
             # Get valid data points with timestamps
             valid_data = []
-            for i, (timestamp, price) in enumerate(zip(self.timestamps, self.price_data)):
+            for i, (timestamp, price) in enumerate(
+                    zip(self.timestamps, self.price_data)):
                 if timestamp is not None and price is not None:
                     valid_data.append((timestamp, price))
 
@@ -802,10 +806,19 @@ class StockApplet:
             first_point = True
             for i, value in valid_points:
                 x = margin_left + (chart_width * i / (len(data) - 1))
-                # Use same normalization as fill area
-                normalized_value = (value - min_val) / (max_val - min_val)
-                y = margin_top + chart_height - \
-                    (chart_height * normalized_value)
+                # Use same normalization for price charts
+                prices = [v for v in data if v is not None]
+                if prices:
+                    min_val = min(prices)
+                    max_val = max(prices)
+                    if max_val > min_val:
+                        normalized = (value - min_val) / \
+                            (max_val - min_val)
+                    else:
+                        normalized = 0.5
+                    y = margin_top + chart_height - (chart_height * normalized)
+                else:
+                    y = margin_top + chart_height / 2
 
                 if first_point:
                     cr.move_to(x, y)
@@ -878,22 +891,25 @@ class StockApplet:
         if not hasattr(self, 'chart_areas') or not self.chart_areas:
             return
 
-        # Get panel height from applet allocation, with fallback
-        try:
-            applet_allocation = self.applet.get_allocation()
-            container_allocation = self.container.get_allocation()
-
-            # Use the larger of applet or container height
-            available_height = max(applet_allocation.height, container_allocation.height)
-
-            # Use almost full height, leaving minimal margin (1px each side)
-            chart_height = max(16, available_height - 2)
-        except:
-            chart_height = 24  # Fallback
+        # # Get panel height from applet allocation, with fallback
+        # try:
+        #     applet_allocation = self.applet.get_allocation()
+        #     container_allocation = self.container.get_allocation()
+        #
+        #     # Use the larger of applet or container height
+        #     available_height = max(
+        #         applet_allocation.height,
+        #         container_allocation.height)
+        #
+        #     # Use almost full height, leaving minimal margin (1px each side)
+        #     chart_height = max(16, available_height - 2)
+        # except Exception:
+        #     chart_height = 24  # Fallback
 
         chart_width = self.preferences['chart_width']
 
-        # Update size requests for all chart areas (only width, let height expand)
+        # Update size requests for all chart areas
+        # (only width, let height expand)
         for chart_area in self.chart_areas.values():
             chart_area.set_size_request(chart_width, -1)
 
@@ -1052,51 +1068,36 @@ class StockApplet:
             cr.show_text(symbol)
 
     def update_panel_display(self):
-        """Update panel display based on preferences"""
-        # Remove all children
-        for child in self.container.get_children():
-            self.container.remove(child)
-
+        """Update the panel display based on preferences"""
         if self.preferences['show_chart']:
-            # Add stock price chart
-            if self.preferences['show_current_price']:
-                self.container.pack_start(self.chart_areas['price'],
-                                          True, True, 0)
+            # Remove label if present
+            if self.label.get_parent():
+                self.container.remove(self.label)
+            # Add chart areas
+            for area in self.chart_areas.values():
+                if area.get_parent() is None:
+                    self.container.add(area)
         else:
-            self.container.add(self.label)
+            # Remove chart areas if present
+            for area in self.chart_areas.values():
+                if area.get_parent() is not None:
+                    self.container.remove(area)
+            # Add label if not present
+            if self.label.get_parent() is None:
+                self.container.add(self.label)
 
         self.container.show_all()
 
-        # Update chart dimensions after layout changes
-        GLib.idle_add(self.update_chart_dimensions)
-
-    def on_applet_size_allocate(self, widget, allocation):
-        """Called when applet size changes"""
-        # Update chart dimensions when panel size changes
-        GLib.idle_add(self.update_chart_dimensions)
-
-    def switch_display_mode(self):
-        """Switch between text and chart display modes"""
-        self.update_panel_display()
-
-    def update_chart_sizes(self):
-        """Update chart sizes when width preference changes"""
-        # Use the new dynamic sizing method
+    def on_applet_size_allocate(self, allocation):
+        """Handle size allocation changes"""
         self.update_chart_dimensions()
 
-        # Force redraw
-        for area in self.chart_areas.values():
-            area.queue_draw()
+    def applet_factory(applet, iid, data):
+        if iid != "StockApplet":
+            return False
 
-    def refresh_charts(self):
-        """Refresh all charts (useful when transparency changes)"""
-        # Force redraw of panel charts
-        for area in self.chart_areas.values():
-            area.queue_draw()
-
-        # Force redraw of chart window if open
-        if self.chart_window and self.chart_window.get_visible():
-            self.chart_drawing_area.queue_draw()
+        StockApplet(applet)
+        return True
 
 
 def applet_factory(applet, iid, data):
