@@ -60,6 +60,7 @@ class StockApplet:
         # Make container expand to fill applet space
         self.container.set_vexpand(True)
         self.container.set_hexpand(False)
+        self.container.set_hexpand(False)
         self.applet.add(self.container)
 
         # Initialize display widgets
@@ -256,14 +257,18 @@ class StockApplet:
                 tooltip_lines.append("Chart Period:")
 
                 if min_timestamp:
-                    min_time = time.strftime("%b %d %H:%M",
-                                           time.localtime(min_timestamp))
-                    tooltip_lines.append(f"Lowest: ${min_price:.2f} ({min_time})")
+                    min_time = time.strftime(
+                        "%b %d %H:%M",
+                        time.localtime(min_timestamp))
+                    tooltip_lines.append(
+                        f"Lowest: ${min_price:.2f} ({min_time})")
 
                 if max_timestamp:
-                    max_time = time.strftime("%b %d %H:%M",
-                                           time.localtime(max_timestamp))
-                    tooltip_lines.append(f"Highest: ${max_price:.2f} ({max_time})")
+                    max_time = time.strftime(
+                        "%b %d %H:%M",
+                        time.localtime(max_timestamp))
+                    tooltip_lines.append(
+                        f"Highest: ${max_price:.2f} ({max_time})")
 
         tooltip_text = "\n".join(tooltip_lines)
         self.label.set_tooltip_text(tooltip_text)
@@ -559,7 +564,8 @@ class StockApplet:
                 self.current_price_check.get_active()
             self.preferences['show_daily_range'] = \
                 self.daily_range_check.get_active()
-            self.preferences['show_chart'] = self.chart_view_check.get_active()
+            # self.preferences['show_chart'] =
+            #   self.chart_view_check.get_active()
             self.preferences['chart_width'] = \
                 int(self.chart_width_spin.get_value())
             self.preferences['chart_transparency'] = \
@@ -591,15 +597,14 @@ class StockApplet:
 
             # Switch display mode if chart preference changed
             if old_chart_mode != self.preferences['show_chart']:
-                self.switch_display_mode()
+                self.update_panel_display()
             # Update chart size if width changed
-            elif (self.preferences['show_chart'] and
-                  old_chart_width != self.preferences['chart_width']):
-                self.update_chart_sizes()
-            # Refresh charts if transparency or font size changed
-            elif (old_transparency != self.preferences['chart_transparency'] or
+            elif (old_chart_width != self.preferences['chart_width'] or
+                  old_transparency != self.preferences['chart_transparency'] or
                   old_font_size != self.preferences['chart_font_size']):
-                self.refresh_charts()
+                if self.preferences['show_chart']:
+                    for area in self.chart_areas.values():
+                        area.queue_draw()
 
             # Update display immediately
             self.update_stock_info()
@@ -746,7 +751,8 @@ class StockApplet:
 
             # Handle case where price range is very small
             if price_range < 0.01:
-                price_range = max_val * 0.01  # Use 1% of max price as minimum range
+                price_range = max_val * 0.01
+                # Use 1% of max price as minimum range
 
             for i in range(0, 6):
                 # Calculate actual price value for this grid line
@@ -768,9 +774,11 @@ class StockApplet:
             # Calculate transparency alpha value (0-1)
             alpha = self.preferences['chart_transparency'] / 100.0
 
-            # Handle case where all values are the same (avoid division by zero)
+            # Handle case where all values are the same
+            # (avoid division by zero)
             if max_val == min_val:
-                # If all prices are the same, draw a horizontal line in the middle
+                # If all prices are the same,
+                # draw a horizontal line in the middle
                 max_val = min_val + (min_val * 0.01 if min_val > 0 else 0.01)
 
             # Draw filled area
@@ -858,17 +866,19 @@ class StockApplet:
     def create_chart_areas(self):
         """Create individual drawing areas for each chart type"""
         # Get panel height from applet allocation, with fallback
-        try:
-            applet_allocation = self.applet.get_allocation()
-            container_allocation = self.container.get_allocation()
+        # try:
+        #     applet_allocation = self.applet.get_allocation()
+        #     container_allocation = self.container.get_allocation()
 
-            # Use the larger of applet or container height
-            available_height = max(applet_allocation.height, container_allocation.height)
+        #     # Use the larger of applet or container height
+        #     available_height = max(
+        #         applet_allocation.height,
+        #         container_allocation.height)
 
-            # Use almost full height, leaving minimal margin (1px each side)
-            chart_height = max(16, available_height - 2)
-        except:
-            chart_height = 24  # Fallback to original hardcoded value
+        #     # Use almost full height, leaving minimal margin (1px each side)
+        #     chart_height = max(16, available_height - 2)
+        # except Exception:
+        #     chart_height = 24  # Fallback to original hardcoded value
 
         chart_width = self.preferences['chart_width']
 
@@ -1092,11 +1102,11 @@ class StockApplet:
         """Handle size allocation changes"""
         self.update_chart_dimensions()
 
-    def applet_factory(applet, iid, data):
+    def applet_factory(self, iid, data):
         if iid != "StockApplet":
             return False
 
-        StockApplet(applet)
+        StockApplet(self)
         return True
 
 
